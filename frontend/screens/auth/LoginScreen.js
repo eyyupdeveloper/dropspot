@@ -9,9 +9,9 @@ import {
 } from "react-native";
 import axios from "axios";
 
-export default function LoginScreen({ navigation, route }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+export default function LoginScreen({ navigation, route, setAuthenticated }) {  
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
     try {
@@ -20,7 +20,7 @@ export default function LoginScreen({ navigation, route }) {
         password,
       });
       Alert.alert("Hoş geldin!", "Giriş başarılı");
-      route.params?.setAuthenticated(true); // auth durumunu güncelle
+      setAuthenticated(true);
     } catch (err) {
       Alert.alert("Hata", err.response?.data?.detail || "Giriş başarısız");
     }

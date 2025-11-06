@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import axios from "axios";
 
-export default function SignupScreen({ navigation }) {
+export default function SignupScreen({ navigation, setAuthenticated }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -20,7 +20,7 @@ export default function SignupScreen({ navigation }) {
         password,
       });
       Alert.alert("Başarılı", "Kayıt tamamlandı!");
-      navigation.navigate("Login");
+      setAuthenticated(true);
     } catch (err) {
       Alert.alert("Hata", err.response?.data?.detail || "Kayıt başarısız");
     }

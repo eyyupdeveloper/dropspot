@@ -31,3 +31,20 @@ def waitlist_katil(user_id: int, drop_id: int, db: Session = Depends(get_db)):
     db.refresh(kayit)
     return {"mesaj": "Bekleme listesine katıldın!", "waitlist_id": kayit.id}
 
+@router.post("/leave")
+def waitlist_ayril(user_id: int, drop_id: int, db: Session = Depends(get_db)):
+    # Kullanıcının bekleme listesinde olup olmadığını kontrol et
+    kayit = db.query(Waitlist).filter_by(user_id=user_id, drop_id=drop_id).first()
+    
+    if not kayit:
+        return {"mesaj": "Zaten bekleme listesinde değilsin (idempotent işlem çalıştı)"}
+
+    # Eğer claim etmişse, ayrılmasına izin verme
+    if kayit.claimed:
+        raise HTTPException(status_code=400, detail="Hak talebi yapıldıktan sonra listeden ayrılamazsın.")
+    
+    # Kaydı sil
+    db.delete(kayit)
+    db.commit()
+    
+    return {"mesaj": "Bekleme listesinden ayrıldın."}

@@ -10,3 +10,5 @@ class Drop(Base):
     aciklama = Column(String, nullable=True)
     stok = Column(Integer, default=0)
     claim_baslangic = Column(DateTime, default=datetime.utcnow)
+    kisa_aciklama = Column(String, nullable=True)
+    image_url = Column(String, default="https://via.placeholder.com/150") 

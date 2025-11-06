@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,49 +6,95 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  SafeAreaView,
 } from "react-native";
 import axios from "axios";
 
-export default function ClaimScreen() {
+const API_URL = "http://127.0.0.1:8000"; 
+const USER_ID = 1; // Geçici kullanıcı ID'si
+
+export default function ClaimScreen({ route }) {
+  const { drop_id, drop_baslik } = route.params;
+  
   const [loading, setLoading] = useState(false);
   const [claimCode, setClaimCode] = useState(null);
+  const [message, setMessage] = useState("Hak kazanıp kazanmadığını görmek için Claim Et butonuna bas.");
+
+  useEffect(() => {
+    checkInitialClaimStatus();
+  }, []);
+
+  const checkInitialClaimStatus = async () => {
+    setLoading(true);
+    try {
+        const res = await axios.post(
+            `${API_URL}/claim?user_id=${USER_ID}&drop_id=${drop_id}`
+        );
+        
+        if (res.data.claim_kodu) {
+            setClaimCode(res.data.claim_kodu);
+            setMessage("Hakkını zaten kullandın. Kodun aşağıdadır.");
+        }
+        
+    } catch (err) {
+        setMessage("Hak kazanıp kazanmadığını görmek için Claim Et butonuna bas.");
+        setClaimCode(null);
+
+    } finally {
+        setLoading(false);
+    }
+  };
 
   const handleClaim = async () => {
+    setLoading(true);
+    setMessage("Hak talebin kontrol ediliyor...");
+    
     try {
-      setLoading(true);
       const res = await axios.post(
-        "http://127.0.0.1:8000/claim?user_id=1&drop_id=1"
+        `${API_URL}/claim?user_id=${USER_ID}&drop_id=${drop_id}`
       );
-      setClaimCode(res.data.claim_kodu);
+      
+      const newCode = res.data.claim_kodu;
+      
+      setClaimCode(newCode);
+      setMessage(res.data.mesaj || "Tebrikler! Claim kodun başarıyla oluşturuldu.");
+
     } catch (err) {
-      Alert.alert("Hata", err.response?.data?.detail || "Bir hata oluştu");
+      const detail = err.response?.data?.detail || "Bir hata oluştu";
+      Alert.alert("Claim Başarısız", detail);
+      setMessage(`Hata: ${detail}`); 
+
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.header}>🎟 Claim Zamanı</Text>
-        <Text style={styles.desc}>
-          Eğer hak kazandıysan aşağıdaki butona basarak kodunu alabilirsin.
-        </Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#f4f5f7" }}>
+      <View style={styles.container}>
+        <View style={styles.card}>
+          <Text style={styles.header}>🎟 {drop_baslik} Claim Penceresi</Text>
+          <Text style={styles.desc}>{message}</Text>
 
-        {loading ? (
-          <ActivityIndicator size="large" color="#007bff" />
-        ) : claimCode ? (
-          <View style={styles.codeBox}>
-            <Text style={styles.codeLabel}>Senin Kodun:</Text>
-            <Text style={styles.code}>{claimCode}</Text>
-          </View>
-        ) : (
-          <TouchableOpacity style={styles.button} onPress={handleClaim}>
-            <Text style={styles.buttonText}>Claim Et</Text>
-          </TouchableOpacity>
-        )}
+          {loading ? (
+            <View style={styles.loaderContainer}>
+                <ActivityIndicator size="large" color="#007bff" />
+                <Text style={styles.loadingText}>Claim durumu kontrol ediliyor...</Text>
+            </View>
+          ) : claimCode ? (
+            <View style={styles.codeBox}>
+              <Text style={styles.codeLabel}>Senin Claim Kodun:</Text>
+              <Text style={styles.code}>{claimCode}</Text>
+              <Text style={styles.infoText}>Bu kod tek kullanımlıktır ve stoktan düşülmüştür.</Text>
+            </View>
+          ) : (
+            <TouchableOpacity style={styles.button} onPress={handleClaim}>
+              <Text style={styles.buttonText}>Hakkımı Şimdi Claim Et</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -68,40 +114,68 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowRadius: 6,
     elevation: 4,
+    alignItems: 'center',
   },
   header: {
-    fontSize: 26,
-    fontWeight: "700",
+    fontSize: 24,
+    fontWeight: "800",
     marginBottom: 10,
+    color: '#222',
+    textAlign: 'center',
   },
   desc: {
-    color: "#444",
+    color: "#555",
     marginBottom: 20,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  loaderContainer: {
+      padding: 20,
+      alignItems: 'center',
+  },
+  loadingText: {
+      marginTop: 10,
+      color: '#007bff',
+      fontWeight: '600',
   },
   button: {
     backgroundColor: "#007bff",
-    padding: 14,
-    borderRadius: 8,
+    padding: 16,
+    borderRadius: 10,
     alignItems: "center",
+    width: '100%',
+    marginTop: 10,
   },
   buttonText: {
     color: "white",
-    fontWeight: "600",
+    fontWeight: "700",
+    fontSize: 16,
   },
   codeBox: {
     backgroundColor: "#eaf4ff",
-    borderRadius: 10,
-    padding: 20,
+    borderRadius: 12,
+    padding: 25,
     alignItems: "center",
+    width: '100%',
+    borderWidth: 2,
+    borderColor: '#007bff',
   },
   codeLabel: {
-    fontSize: 16,
-    color: "#555",
+    fontSize: 18,
+    color: "#007bff",
+    fontWeight: '600',
   },
   code: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#007bff",
-    marginTop: 5,
+    fontSize: 36,
+    fontWeight: "800",
+    color: "#333",
+    marginTop: 10,
+    letterSpacing: 3,
+  },
+  infoText: {
+      marginTop: 15,
+      fontSize: 13,
+      color: '#777',
+      textAlign: 'center',
   },
 });

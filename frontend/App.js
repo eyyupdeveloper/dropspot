@@ -25,7 +25,9 @@ export default function App() {
           <Stack.Screen name="Login">
             {(props) => <LoginScreen {...props} setAuthenticated={setAuthenticated} />}
           </Stack.Screen>
-          <Stack.Screen name="Signup" component={SignupScreen} />
+          <Stack.Screen name="Signup">
+              {(props) => <SignupScreen {...props} setAuthenticated={setAuthenticated} />}
+          </Stack.Screen>        
         </Stack.Navigator>
       )}
     </NavigationContainer>
