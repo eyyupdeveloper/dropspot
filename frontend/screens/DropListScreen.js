@@ -6,29 +6,24 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  SafeAreaView, // Ekran güvenliği için eklendi
+  SafeAreaView,
 } from "react-native";
 import axios from "axios";
 
-// API Adresini, 10.0.2.2 veya 192.168.X.X gibi çalışan adresinizle değiştirin!
 const API_URL = "http://127.0.0.1:8000"; 
 
-export default function DropListScreen({ navigation }) {
+export default function DropListScreen({ navigation, isAdmin }) {
   const [drops, setDrops] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // API isteği yapılırken 127.0.0.1 yerine doğru IP kullandığınızdan emin olun.
     axios
-      .get(`${API_URL}/drops`) // Aktif drop listesi endpoint'i
+      .get(`${API_URL}/drops`) 
       .then((res) => {
-        // Varsayımsal drop verilerine yeni alanlar eklenmiş olabilir
         setDrops(res.data);
       })
       .catch((err) => {
         console.log("API hatası:", err.message);
-        // Hata durumunda boş sayfa yerine bir uyarı gösterilebilir
-        // Alert.alert("Hata", "Drop listesi yüklenemedi.");
       })
       .finally(() => setLoading(false));
   }, []);
@@ -42,7 +37,6 @@ export default function DropListScreen({ navigation }) {
     );
   }
   
-  // Hiç drop yoksa kullanıcıya bilgi verin
   if (drops.length === 0) {
       return (
           <View style={styles.center}>
@@ -63,7 +57,6 @@ export default function DropListScreen({ navigation }) {
   };
 
   const renderItem = ({ item }) => {
-    // Drop'larda varsayımsal 'durum' alanı kullanıldı
     const statusText = item.durum || 'Aktif'; 
     const statusStyles = getStatusStyle(statusText);
     
@@ -80,7 +73,6 @@ export default function DropListScreen({ navigation }) {
             </View>
         </View>
         
-        {/* Varsayımsal kısa açıklama alanı */}
         <Text style={styles.description}>{item.kisa_aciklama || "Özel ürünün sınırlı stoğu yakında yayınlanacak."}</Text>
 
         <View style={styles.footerRow}>
@@ -94,7 +86,15 @@ export default function DropListScreen({ navigation }) {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f4f5f7" }}>
       <View style={styles.container}>
-        <Text style={styles.header}>✨ DropSpot | Aktif Drop'lar</Text>
+        <Text style={styles.header}>✨Aktif Drop'lar</Text>
+        {isAdmin && (
+                <TouchableOpacity
+                    style={styles.adminButton}
+                    onPress={() => navigation.navigate("Admin")}
+                >
+                    <Text style={styles.adminButtonText}>Admin</Text>
+                </TouchableOpacity>
+            )}
         <FlatList
           data={drops}
           keyExtractor={(item) => item.id.toString()}
@@ -108,6 +108,29 @@ export default function DropListScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+    headerContainer: { 
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingTop: 15,
+        marginBottom: 20,
+    },
+    mainHeader: {
+        fontSize: 26,
+        fontWeight: "800",
+        color: "#222",
+    },
+    adminButton: {
+        backgroundColor: '#6c757d',
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 5,
+    },
+    adminButtonText: {
+        color: '#fff',
+        fontWeight: '600',
+    },
   container: {
     flex: 1,
     paddingHorizontal: 15,
@@ -134,14 +157,16 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: "#fff",
-    borderRadius: 12,
+    borderRadius: 15,
     padding: 18,
-    marginBottom: 15,
+    marginBottom: 18,
     shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 10,
+    elevation: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
     borderLeftWidth: 5,
     borderLeftColor: '#007bff',
   },

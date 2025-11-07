@@ -4,6 +4,7 @@ from app.database import SessionLocal
 from app.models.user import User
 import bcrypt
 from pydantic import BaseModel
+from app.routers.drops import ADMIN_USER_ID
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -51,6 +52,7 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     password_bytes = user.password.encode("utf-8")[:72]
     if not bcrypt.checkpw(password_bytes, db_user.password.encode("utf-8")):
         raise HTTPException(status_code=401, detail="E-posta veya şifre hatalı")
-
-    return {"message": "Giriş başarılı", "user_id": db_user.id}
+    
+    is_admin = db_user.id == ADMIN_USER_ID
+    return {"message": "Giriş başarılı", "user_id": db_user.id, "is_admin": is_admin}
 

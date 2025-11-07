@@ -104,6 +104,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#f4f5f7",
     justifyContent: "center",
     padding: 20,
+    alignSelf: 'center',
+    width: '100%',
+    maxWidth: 600,
   },
   card: {
     backgroundColor: "#fff",

@@ -60,6 +60,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#f4f5f7",
     justifyContent: "center",
     padding: 25,
+    alignSelf: 'center',
+    width: '100%',
+    maxWidth: 600,
   },
   title: {
     fontSize: 28,

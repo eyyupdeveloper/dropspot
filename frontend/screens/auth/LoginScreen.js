@@ -6,10 +6,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Image,
 } from "react-native";
 import axios from "axios";
 
-export default function LoginScreen({ navigation, route, setAuthenticated }) {  
+const LOGO_URL = "https://www.alpacotech.com/logo.png";
+
+export default function LoginScreen({ navigation, route, setAuthenticated, setIsAdmin }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
@@ -20,6 +23,9 @@ export default function LoginScreen({ navigation, route, setAuthenticated }) {
         password,
       });
       Alert.alert("Hoş geldin!", "Giriş başarılı");
+      if (setIsAdmin) { // Prop'un varlığını kontrol et
+          setIsAdmin(res.data.is_admin);
+      }
       setAuthenticated(true);
     } catch (err) {
       Alert.alert("Hata", err.response?.data?.detail || "Giriş başarısız");
@@ -28,6 +34,7 @@ export default function LoginScreen({ navigation, route, setAuthenticated }) {
 
   return (
     <View style={styles.container}>
+      <Image source={{ uri: LOGO_URL }} style={styles.logo} />
       <Text style={styles.title}>Giriş Yap</Text>
       <TextInput
         placeholder="E-posta"
@@ -61,6 +68,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#f4f5f7",
     justifyContent: "center",
     padding: 25,
+    alignSelf: 'center',
+    width: '100%',
+    maxWidth: 600,
+  },
+  logo: {
+    width: 250, 
+    height: 250, 
+    resizeMode: 'contain', 
+    alignSelf: 'center',
   },
   title: {
     fontSize: 28,

@@ -183,6 +183,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f4f5f7",
+    alignSelf: 'center',
+    width: '100%',
+    maxWidth: 600,
   },
   dropImage: {
     width: '100%',
